@@ -46,13 +46,8 @@ question: "באיזו מבין הערים/ישובים דווחו הכי הרב�
 options: " רחובות |  בנימינה | תל-שבע"
 
 the typed in the answer would be "בנימינה", typed in as a textual string
+
 ###  Ask User About Fact
-Each question template would define the area of the correct answer to the generated question.
-The point the user will click upon will result in a pass/fail of the check. A human user should pass at least one of 3 tries. If not, the record will be marked as suspicious.
-
-
-I think that it would be better to have the user select out of a few predefined answers instead of clicking on the image (which is error prone).
-
 The server:
 1. creates a unique question based on the data from a predefined set of templates. The template defines:
    - text template for question
