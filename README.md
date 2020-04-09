@@ -54,38 +54,40 @@ The point the user will click upon will result in a pass/fail of the check. A hu
 I think that it would be better to have the user select out of a few predefined answers instead of clicking on the image (which is error prone).
 
 The server:
-a. creates a unique question based on the data from a predefined set of templates
-   - template defines: text template for question,text templates for possible answers, chart type
-b. draws the chart into a bitmap image
-c. generates a unique chart id
-d. prepares the template values for the question and answers
-e. for each answer generates an encrypted token including the following data:
+1. creates a unique question based on the data from a predefined set of templates. The template defines:
+   - text template for question
+   - text templates for possible answers
+   - chart type
+2. draws the chart into a bitmap image
+3. generates a unique chart id
+4. prepares the template values for the question and answers
+5. for each answer generates an encrypted token including the following data:
     - timestamp
     - chart id
     - random number
     - correct (true/false)
-f. sends to the client:
-    i. the chart
-    ii. chart id
-    iii. question & answer template identifier and required data
-    iv. answer tokens
+6. sends to the client:
+   - the chart
+   - chart id
+   - question & answer template identifier and required data
+   - answer tokens
 
 the client then
-g. shows the chart to the user
-h. renders the question and answers based on the values and template
-i. waits for user input
-j. when submitting the report, the client sends the server with the report data also:
+1. shows the chart to the user
+2. renders the question and answers based on the values and template
+3. waits for user input
+4. when submitting the report, the client sends the server with the report data also:
    - chart-id
    - selected answer token
 
 the server finally:
-k. decrypts the token
-l. compares the decrypted chart-id to the one sent from the client
-m. verifies the timestamp (not too old)
-n. verities it is the correct answer
-o. saves the report to the db
+1. decrypts the token
+2. compares the decrypted chart-id to the one sent from the client
+3. verifies the timestamp (not too old)
+4. verities it is the correct answer
+5. saves the report to the db
 
-An alternative to (j) above would be:
+An alternative to the submit process above would be:
 - The client sends just the chart-id and the encrypted token
 - The server verifies and returns an encrypted "proof of humanity" / failure
 - The client then decides whether to ask the user for another challenge
