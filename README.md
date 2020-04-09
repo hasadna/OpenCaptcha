@@ -53,36 +53,39 @@ The server:
    - text template for question
    - text templates for possible answers
    - chart type
-2. draws the chart into a bitmap image
-3. generates a unique chart id
-4. prepares the template values for the question and answers
-5. for each answer generates an encrypted token including the following data:
+1. draws the chart into a bitmap image
+1. prepares the template values for the question and answers
+1. generates a random 128 bit challenge_id and the following context associated with it:
     - timestamp
-    - chart id
-    - random number
-    - correct (true/false)
-6. sends to the client:
+    - correct answer
+    - verification attempt number
+1. saves the context to cache (e.g. redis), keyed by the challenge_id and with a TTL of a few minutes (longer than the max time we allow for the user to answer) 
+1. sends to the client:
+   - challenge_id
    - the chart
-   - chart id
-   - question & answer template identifier and required data
-   - answer tokens
+   - question & possible answers
 
-the client then
+The client then
 1. shows the chart to the user
-2. renders the question and answers based on the values and template
-3. waits for user input
-4. when submitting the report, the client sends the server with the report data also:
-   - chart-id
-   - selected answer token
+1. renders the question and answers based on the values and template
+1. waits for user input
+1. when submitting the report, the client sends the server with the report data also:
+   - challenge_id
+   - user's typed answer
 
-the server finally:
-1. decrypts the token
-2. compares the decrypted chart-id to the one sent from the client
-3. verifies the timestamp (not too old)
-4. verities it is the correct answer
-5. saves the report to the db
+The server finally:
+1. retrieves and deletes the associated context from the cache. 
+If the context is not found (either because the TTL has passed or because an answer has already been received for this challenge_id(*))
+then the response is considered suspicious.
+1. verifies the timestamp (not too old)
+1. verifies the answer matches the correct answer in the context (up to small diff due to typos or alternative spelling)
+1. saves the report to the db (in suspicious bucket or regular one).
+If we want to give users more than one attempt, we can generate another challenge
+and increment the attempt number saved with the context. The logic for how many attempts
+to provide and whether to track multiple attempts as slightly suspicious is left
+to the broader server logic.
 
-An alternative to the submit process above would be:
-- The client sends just the chart-id and the encrypted token
-- The server verifies and returns an encrypted "proof of humanity" / failure
-- The client then decides whether to ask the user for another challenge
+(*) If we want to differentiate between late responses and multiple responses for same 
+challenge_id (which is even more suspicious) then we can save the used challenge IDs in a 
+separate cache with a longer TTL and check against that when a challenge ID is not found in the 
+regular cache.
