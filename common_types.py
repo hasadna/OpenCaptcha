@@ -1,12 +1,17 @@
 import dataclasses
 import json
-from typing import Sequence, Mapping, Tuple, Any
+from typing import Sequence, Mapping, Tuple, Any, NewType
+
+import numpy as np
+import pandas as pd
+
 
 #################################################################
 # Exceptions
 #################################################################
 class CaptchaError(Exception):
     pass
+
 
 class ConfigurationError(CaptchaError):
     pass
@@ -26,11 +31,16 @@ InputTable = Sequence[InputTableRow]
 TemplateParams = Mapping[str, Any]
 TemplateConfig = Tuple[str, TemplateParams]
 
+#################################################################
+# Internal structures
+#################################################################
+DataTables = Mapping[str, pd.DataFrame]
+RNG = np.random.RandomState
 
 #################################################################
 # Challenge generation
 #################################################################
-ChallengeId = int  # 128 bit random integer
+ChallengeId = NewType('ChallengeId', str)  # 128 bit random token
 
 
 @dataclasses.dataclass
