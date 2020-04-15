@@ -51,12 +51,14 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEqual(self.captcha.verify_response('Los Angeles', loaded_context), False)
                 self.assertEqual(self.captcha.verify_response('Potato!', loaded_context), False)
                 self.assertEqual(self.captcha.verify_response('New York', loaded_context), True)
+                self.assertEqual(self.captcha.verify_response('New Yorx', loaded_context), True)
             else:
                 all_variants.add('deaths')
                 self.assertEqual(set(challenge.possible_answers), {'New York', 'Los Angeles', 'Boston', 'West Yellowstone'})
                 self.assertEqual(self.captcha.verify_response('New York', loaded_context), False)
                 self.assertEqual(self.captcha.verify_response('Wuhan', loaded_context), False)
                 self.assertEqual(self.captcha.verify_response('Boston', loaded_context), True)
+                self.assertEqual(self.captcha.verify_response('Bostn', loaded_context), True)
         self.assertEqual(len(all_challenge_ids), 10)
         self.assertEqual(all_variants, {'symptoms', 'deaths'})
 
