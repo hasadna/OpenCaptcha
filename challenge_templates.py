@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
+import io
 from typing import Sequence, Tuple, Mapping, Type
 
-from common_types import TemplateConfig, ConfigurationError, Challenge, CaptchaError, DataTables, RNG
+from matplotlib import pyplot as plt
+
+from common_types import (
+    TemplateConfig, ConfigurationError, Challenge, CaptchaError, DataTables, RNG, RenderingOptions
+)
 
 
 #################################################################
@@ -24,7 +29,11 @@ class ChallengeTemplate(ABC):
         return getattr(cls, 'config_name', cls.__name__)
 
     @abstractmethod
-    def generate_challenge(self, data: DataTables, rng: RNG) -> Tuple[Challenge, str]:
+    def generate_challenge(self,
+                           data: DataTables,
+                           rng: RNG,
+                           rendering_options: RenderingOptions
+                           ) -> Tuple[Challenge, str]:
         """Generate and return a challenge and its correct answer."""
         pass
 
@@ -58,6 +67,24 @@ def instantiate_templates(configs: Sequence[TemplateConfig]) -> Sequence[Challen
 
 
 #################################################################
+# Plotting helpers
+#################################################################
+def save_figure(fig) -> bytes:
+    with io.BytesIO() as f:
+        fig.savefig(f, format='png')
+        return f.getvalue()
+
+
+def render_bar_chart(label_value_pairs: Sequence[Tuple[str, float]],
+                     options: RenderingOptions) -> bytes:
+    labels, values = list(zip(*label_value_pairs))
+    fig = plt.figure(figsize=options.figure_size)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.bar(labels, values)
+    return save_figure(fig)
+
+
+#################################################################
 # Concrete template types
 #################################################################
 class BarTemplate(ChallengeTemplate):
@@ -82,7 +109,11 @@ class BarTemplate(ChallengeTemplate):
         self.value_column = values
         self.n = n
 
-    def generate_challenge(self, data: DataTables, rng: RNG) -> Tuple[Challenge, str]:
+    def generate_challenge(self,
+                           data: DataTables,
+                           rng: RNG,
+                           rendering_options: RenderingOptions
+                           ) -> Tuple[Challenge, str]:
         # TODO: generalize to not only max.
         table = data[self.table_name]
         subset = table.nlargest(self.n, self.value_column)
@@ -90,6 +121,6 @@ class BarTemplate(ChallengeTemplate):
         correct_answer = subset[0][0]
         rng.shuffle(subset)
         possible_answers = [x[0] for x in subset]
-        chart = b'blerg'
+        chart = render_bar_chart(subset, rendering_options)
         challenge = Challenge(self.question, chart, possible_answers)
         return challenge, correct_answer

@@ -1,13 +1,15 @@
 import unittest
 import json
+import os
 import textwrap
-from common_types import ServerContext
+from common_types import ServerContext, RenderingOptions
 from captcha_generator import CaptchaGenerator
+from challenge_templates import render_bar_chart
 
 
 class IntegrationTest(unittest.TestCase):
     def setUp(self):
-        data = {
+        self.data = {
             'report_counts': [
                 dict(city_name='New York', num_symptoms=9666, num_deaths=123),
                 dict(city_name='Los Angeles', num_symptoms=5000, num_deaths=23),
@@ -34,8 +36,15 @@ class IntegrationTest(unittest.TestCase):
                 "n": 4
             }]
         ]""")
-        template_configs = json.loads(template_configs_json)
-        self.captcha = CaptchaGenerator(data, template_configs, response_timeout_sec=180)
+        self.template_configs = json.loads(template_configs_json)
+        self.captcha = CaptchaGenerator(self.data, self.template_configs, response_timeout_sec=180)
+
+    @staticmethod
+    def _save_image(image_bytes, name):
+        path = os.path.abspath(f'{name}.png')
+        print(f'Writing image to {path}')
+        with open(path, 'wb') as f:
+            f.write(image_bytes)
 
     def test_full_flow_sanity(self):
         all_challenge_ids = set()
@@ -61,6 +70,22 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEqual(self.captcha.verify_response('Bostn', loaded_context), True)
         self.assertEqual(len(all_challenge_ids), 10)
         self.assertEqual(all_variants, {'symptoms', 'deaths'})
+
+    def test_full_flow_with_image(self):
+        template_configs = self.template_configs[:1]  # Ensure we use the symptoms challenge.
+        captcha = CaptchaGenerator(self.data, template_configs, response_timeout_sec=180, rng_seed=0)
+        options = RenderingOptions(figure_size=(4, 3))
+        _, challenge, _ = captcha.generate_challenge(rendering_options=options)
+        expected_chart = render_bar_chart([
+            ('Boston', 800),
+            ('New York', 9666),
+            ('Los Angeles', 5000)
+        ], options=options)
+        if challenge.chart != expected_chart:
+            # Save expected vs actual image for manual inspection / debugging.
+            self._save_image(expected_chart, 'expected-chart')
+            self._save_image(challenge.chart, 'actual-chart')
+        self.assertEqual(challenge.chart, expected_chart)
 
 
 if __name__ == '__main__':

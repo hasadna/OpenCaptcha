@@ -6,7 +6,7 @@ from typing import Mapping, Sequence, Tuple
 import Levenshtein
 import pandas as pd
 
-from common_types import RNG, InputTable, TemplateConfig, ChallengeId, Challenge, ServerContext
+from common_types import RNG, InputTable, TemplateConfig, ChallengeId, Challenge, ServerContext, RenderingOptions
 from challenge_templates import instantiate_templates
 
 
@@ -24,22 +24,28 @@ class CaptchaGenerator:
                  template_configs: Sequence[TemplateConfig],
                  response_timeout_sec: int,
                  num_letters_per_allowed_typo: int = 5,
+                 rng_seed: int = None,  # Use for testing only
                  verify_config: bool = True):
         self.data = {name: pd.DataFrame.from_records(table) for name, table in data.items()}
         self.templates = instantiate_templates(template_configs)
         self.response_timeout_sec = response_timeout_sec
         self.num_letters_per_allowed_typo = num_letters_per_allowed_typo
-        self._non_crypto_rng = RNG()
+        self._non_crypto_rng = RNG(rng_seed)
 
         # Catch configuration errors early
         if verify_config:
             for t in self.templates:
-                t.generate_challenge(self.data, self._non_crypto_rng)
+                t.generate_challenge(self.data, self._non_crypto_rng, RenderingOptions.default_options())
 
-    def generate_challenge(self, attempt_number: int = 1) -> Tuple[ChallengeId, Challenge, ServerContext]:
+    def generate_challenge(self,
+                           attempt_number: int = 1,
+                           rendering_options: RenderingOptions = None
+                           ) -> Tuple[ChallengeId, Challenge, ServerContext]:
         challenge_id = _generate_challenge_id()
         template = self._non_crypto_rng.choice(self.templates)
-        challenge, correct_answer = template.generate_challenge(self.data, self._non_crypto_rng)
+        if rendering_options is None:
+            rendering_options = RenderingOptions.default_options()
+        challenge, correct_answer = template.generate_challenge(self.data, self._non_crypto_rng, rendering_options)
         context = ServerContext(_get_timestamp(), attempt_number, correct_answer)
         return challenge_id, challenge, context
 

@@ -37,6 +37,18 @@ TemplateConfig = Tuple[str, TemplateParams]
 DataTables = Mapping[str, pd.DataFrame]
 RNG = np.random.RandomState
 
+
+@dataclasses.dataclass
+class RenderingOptions:
+    figure_size: Tuple[float, float]  # Figure size in inches
+
+    @staticmethod
+    def default_options() -> 'RenderingOptions':
+        return RenderingOptions(
+            figure_size=(6.4, 4.8)
+        )
+
+
 #################################################################
 # Challenge generation
 #################################################################
