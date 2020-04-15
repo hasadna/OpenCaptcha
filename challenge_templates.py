@@ -79,9 +79,12 @@ def render_bar_chart(label_value_pairs: Sequence[Tuple[str, float]],
                      options: RenderingOptions) -> bytes:
     labels, values = list(zip(*label_value_pairs))
     fig = plt.figure(figsize=options.figure_size)
-    ax = fig.add_subplot(1, 1, 1)
-    ax.bar(labels, values)
-    return save_figure(fig)
+    try:
+        ax = fig.add_subplot(1, 1, 1)
+        ax.bar(labels, values)
+        return save_figure(fig)
+    finally:
+        plt.close(fig)
 
 
 #################################################################
