@@ -131,3 +131,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Test debugging artifacts
+testdata/*-latest-run.png

@@ -22,17 +22,11 @@ class BadTemplateParameters(ConfigurationError):
 
 class ChallengeTemplate(ABC):
     """Abstract base class for all challenge types."""
-    @classmethod
-    def get_config_name(cls):
-        """Allow derived classes to override the way they are referenced in the config files.
-           Use the class name as default."""
-        return getattr(cls, 'config_name', cls.__name__)
-
     @abstractmethod
     def generate_challenge(self,
                            data: DataTables,
                            rng: RNG,
-                           rendering_options: RenderingOptions
+                           rendering_options: RenderingOptions = None
                            ) -> Tuple[Challenge, str]:
         """Generate and return a challenge and its correct answer."""
         pass
@@ -41,28 +35,34 @@ class ChallengeTemplate(ABC):
 def get_class_by_name_mapping() -> Mapping[str, Type[ChallengeTemplate]]:
     class_by_name = {}
     for cls in ChallengeTemplate.__subclasses__():
-        name = cls.get_config_name()
+        name = cls.config_name
         if name in class_by_name:
             raise CaptchaError(f'Config name {name} used by both {class_by_name[name].__name__} and {cls.__name__}')
         class_by_name[name] = cls
     return class_by_name
 
 
+def instantiate_one_template(cls_by_name: Mapping[str, Type[ChallengeTemplate]],
+                             config: TemplateConfig) -> ChallengeTemplate:
+    name, params = config
+    try:
+        cls = cls_by_name[name]
+    except KeyError:
+        raise UnknownTemplate(name)
+    try:
+        # This call may do additional type checks and raise BadTemplateParameters directly,
+        # but we must catch wrong number or names of parameters here.
+        template = cls(**params)
+    except TypeError as ex:
+        raise BadTemplateParameters(f'Wrong parameters passed to template {name}: {ex}')
+    return template
+
+
 def instantiate_templates(configs: Sequence[TemplateConfig]) -> Sequence[ChallengeTemplate]:
     cls_by_name = get_class_by_name_mapping()
-    templates = []
-    for name, params in configs:
-        try:
-            cls = cls_by_name[name]
-        except KeyError:
-            raise UnknownTemplate(name)
-        try:
-            # This call may do additional type checks and raise BadTemplateParameters directly,
-            # but we must catch wrong number or names of parameters here.
-            t = cls(**params)
-        except TypeError as ex:
-            raise BadTemplateParameters(f'Wrong parameters passed to template {name}: {ex}')
-        templates.append(t)
+    templates = [instantiate_one_template(cls_by_name, config) for config in configs]
+    if not templates:
+        raise ConfigurationError('No templates configured')
     return templates
 
 
@@ -76,7 +76,9 @@ def save_figure(fig) -> bytes:
 
 
 def render_bar_chart(label_value_pairs: Sequence[Tuple[str, float]],
-                     options: RenderingOptions) -> bytes:
+                     options: RenderingOptions = None) -> bytes:
+    if options is None:
+        options = RenderingOptions.default_options()
     labels, values = list(zip(*label_value_pairs))
     fig = matplotlib.figure.Figure(figsize=options.figure_size)
     ax = fig.add_subplot(1, 1, 1)
@@ -103,7 +105,10 @@ class MinMaxBarTemplate(ChallengeTemplate):
     config_name = 'min-max-bar'
 
     def __init__(self, question: str, table: str, labels: str, values: str, variant: str, n: int = 3):
-        self.question = question.format(n=n)
+        try:
+            self.question = question.format(n=n)
+        except Exception:
+            raise ConfigurationError('The question can only contain placeholders for the parameter "n"')
         self.table_name = table
         self.label_column = labels
         self.value_column = values
@@ -115,7 +120,7 @@ class MinMaxBarTemplate(ChallengeTemplate):
     def generate_challenge(self,
                            data: DataTables,
                            rng: RNG,
-                           rendering_options: RenderingOptions
+                           rendering_options: RenderingOptions = None
                            ) -> Tuple[Challenge, str]:
         table = data[self.table_name]
         choose_func = table.nlargest if self.is_max else table.nsmallest

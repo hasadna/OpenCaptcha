@@ -9,6 +9,7 @@ from challenge_templates import render_bar_chart
 
 class IntegrationTest(unittest.TestCase):
     def setUp(self):
+        super().setUp()
         self.data = {
             'report_counts': [
                 dict(city_name='New York', num_symptoms=9666, num_deaths=123),

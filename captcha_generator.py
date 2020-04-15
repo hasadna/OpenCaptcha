@@ -10,12 +10,23 @@ from common_types import RNG, InputTable, TemplateConfig, ChallengeId, Challenge
 from challenge_templates import instantiate_templates
 
 
-def _get_timestamp():
+def _get_timestamp() -> int:
     return int(time.time())
 
 
 def _generate_challenge_id() -> ChallengeId:
     return ChallengeId(secrets.token_hex(16))
+
+
+def _verify_timeout(t0: int, timeout: int) -> bool:
+    elapsed_time = _get_timestamp() - t0
+    return elapsed_time <= timeout
+
+
+def _verify_text_is_close(correct_answer: str, user_answer: str, num_letters_per_allowed_typo: int) -> bool:
+    distance = Levenshtein.distance(user_answer, correct_answer)
+    max_distance = math.ceil(len(correct_answer) / num_letters_per_allowed_typo)
+    return distance <= max_distance
 
 
 class CaptchaGenerator:
@@ -32,10 +43,10 @@ class CaptchaGenerator:
         self.num_letters_per_allowed_typo = num_letters_per_allowed_typo
         self._non_crypto_rng = RNG(rng_seed)
 
-        # Catch configuration errors early
+        # Catch configuration errors early (at config development time by server side programmer)
         if verify_config:
             for t in self.templates:
-                t.generate_challenge(self.data, self._non_crypto_rng, RenderingOptions.default_options())
+                t.generate_challenge(self.data, self._non_crypto_rng)
 
     def generate_challenge(self,
                            attempt_number: int = 1,
@@ -43,20 +54,13 @@ class CaptchaGenerator:
                            ) -> Tuple[ChallengeId, Challenge, ServerContext]:
         challenge_id = _generate_challenge_id()
         template = self._non_crypto_rng.choice(self.templates)
-        if rendering_options is None:
-            rendering_options = RenderingOptions.default_options()
         challenge, correct_answer = template.generate_challenge(self.data, self._non_crypto_rng, rendering_options)
         context = ServerContext(_get_timestamp(), attempt_number, correct_answer)
         return challenge_id, challenge, context
 
     def verify_response(self, user_answer: str, context: ServerContext) -> bool:
-        elapsed_time = _get_timestamp() - context.timestamp
-        if elapsed_time > self.response_timeout_sec:
+        if not _verify_timeout(context.timestamp, self.response_timeout_sec):
             return False
-
-        distance = Levenshtein.distance(user_answer, context.correct_answer)
-        max_distance = math.ceil(len(context.correct_answer) / self.num_letters_per_allowed_typo)
-        if distance > max_distance:
+        if not _verify_text_is_close(context.correct_answer, user_answer, self.num_letters_per_allowed_typo):
             return False
-
         return True
