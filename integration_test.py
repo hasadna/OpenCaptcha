@@ -21,18 +21,20 @@ class IntegrationTest(unittest.TestCase):
 
         template_configs_json = textwrap.dedent("""\
         [
-            ["bar", {
+            ["min-max-bar", {
                 "question": "These {n} cities had the most reported symptoms yesterday. Which city reported the most symptoms?",
                 "table": "report_counts",
                 "labels": "city_name",
                 "values": "num_symptoms",
+                "variant": "max",
                 "n": 3
             }],
-            ["bar", {
+            ["min-max-bar", {
                 "question": "These {n} cities had the most reported deaths yesterday. Which city reported the most deaths?",
                 "table": "report_counts",
                 "labels": "city_name",
                 "values": "num_deaths",
+                "variant": "max",
                 "n": 4
             }]
         ]""")

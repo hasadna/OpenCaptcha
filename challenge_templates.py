@@ -87,9 +87,8 @@ def render_bar_chart(label_value_pairs: Sequence[Tuple[str, float]],
 #################################################################
 # Concrete template types
 #################################################################
-class BarTemplate(ChallengeTemplate):
-    # TODO: Generalize to min / max / random sample of rows (currently only max).
-    """Show several values with their associated labels as a bar chart. Ask for the label of the highest value.
+class MinMaxBarTemplate(ChallengeTemplate):
+    """Show several values with their associated labels as a bar chart. Ask for the label of the highest/lowest value.
 
     Example Config (usually as JSON string):
     ["bar", {
@@ -97,16 +96,20 @@ class BarTemplate(ChallengeTemplate):
       "table": "report_counts",
       "labels": "city_name",
       "values": "num_symptoms",
-      "n": 3
+      "variant": "max",
+      "n": 3,
     }]
     """
-    config_name = 'bar'
+    config_name = 'min-max-bar'
 
-    def __init__(self, question: str, table: str, labels: str, values: str, n: int = 3):
+    def __init__(self, question: str, table: str, labels: str, values: str, variant: str, n: int = 3):
         self.question = question.format(n=n)
         self.table_name = table
         self.label_column = labels
         self.value_column = values
+        if variant.lower() not in {'min', 'max'}:
+            raise ConfigurationError(f'variant must be either "min" or "max". Got {variant}')
+        self.is_max = variant.lower() == 'max'
         self.n = n
 
     def generate_challenge(self,
@@ -114,9 +117,9 @@ class BarTemplate(ChallengeTemplate):
                            rng: RNG,
                            rendering_options: RenderingOptions
                            ) -> Tuple[Challenge, str]:
-        # TODO: generalize to not only max.
         table = data[self.table_name]
-        subset = table.nlargest(self.n, self.value_column)
+        choose_func = table.nlargest if self.is_max else table.nsmallest
+        subset = choose_func(self.n, self.value_column)
         subset = subset[[self.label_column, self.value_column]].to_numpy()
         correct_answer = subset[0][0]
         rng.shuffle(subset)
