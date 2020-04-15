@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import io
 from typing import Sequence, Tuple, Mapping, Type
 
-from matplotlib import pyplot as plt
+import matplotlib.figure
 
 from common_types import (
     TemplateConfig, ConfigurationError, Challenge, CaptchaError, DataTables, RNG, RenderingOptions
@@ -70,21 +70,18 @@ def instantiate_templates(configs: Sequence[TemplateConfig]) -> Sequence[Challen
 # Plotting helpers
 #################################################################
 def save_figure(fig) -> bytes:
-    with io.BytesIO() as f:
-        fig.savefig(f, format='png')
-        return f.getvalue()
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    return buf.getvalue()
 
 
 def render_bar_chart(label_value_pairs: Sequence[Tuple[str, float]],
                      options: RenderingOptions) -> bytes:
     labels, values = list(zip(*label_value_pairs))
-    fig = plt.figure(figsize=options.figure_size)
-    try:
-        ax = fig.add_subplot(1, 1, 1)
-        ax.bar(labels, values)
-        return save_figure(fig)
-    finally:
-        plt.close(fig)
+    fig = matplotlib.figure.Figure(figsize=options.figure_size)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.bar(labels, values)
+    return save_figure(fig)
 
 
 #################################################################
