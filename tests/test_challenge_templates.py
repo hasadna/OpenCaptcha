@@ -1,6 +1,5 @@
 import unittest
 import unittest.mock
-import os
 import pandas as pd
 from open_captcha.common_types import CaptchaError, RenderingOptions, RNG
 from open_captcha.challenge_templates import (
@@ -8,6 +7,7 @@ from open_captcha.challenge_templates import (
     get_class_by_name_mapping, instantiate_one_template, instantiate_templates,
     render_bar_chart,
 )
+from tests.paths import data_file
 from tests.fake_template import QuestTemplate
 
 
@@ -66,11 +66,11 @@ class RenderingMethodsTest(unittest.TestCase):
         )
 
     def _load_image(self, name):
-        with open(os.path.join('testdata', f'{name}.png'), 'rb') as f:
+        with open(data_file(f'{name}.png'), 'rb') as f:
             return f.read()
 
     def _save_image(self, name, image_bytes):
-        with open(os.path.join('testdata', f'{name}.png'), 'wb') as f:
+        with open(data_file(f'{name}.png'), 'wb') as f:
             return f.write(image_bytes)
 
     def _verify_chart(self, chart, name, save_on_failure=False):
