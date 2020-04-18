@@ -33,7 +33,10 @@ class ChallengeTemplate(ABC):
         pass  # pragma: no cover
 
 
-def get_class_by_name_mapping() -> Mapping[str, Type[ChallengeTemplate]]:
+TemplateClassNameMapping = Mapping[str, Type[ChallengeTemplate]]
+
+
+def get_class_by_name_mapping() -> TemplateClassNameMapping:
     class_by_name = {}
     for cls in ChallengeTemplate.__subclasses__():
         name = cls.config_name
@@ -45,7 +48,7 @@ def get_class_by_name_mapping() -> Mapping[str, Type[ChallengeTemplate]]:
     return class_by_name
 
 
-def instantiate_one_template(cls_by_name: Mapping[str, Type[ChallengeTemplate]],
+def instantiate_one_template(cls_by_name: TemplateClassNameMapping,
                              config: TemplateConfig) -> ChallengeTemplate:
     name, params = config
     try:

@@ -6,7 +6,10 @@ from typing import Mapping, Sequence, Tuple
 import Levenshtein
 import pandas as pd
 
-from .common_types import RNG, InputTable, TemplateConfig, ChallengeId, Challenge, ServerContext, RenderingOptions
+from .common_types import (
+    RNG, InputTable, TemplateConfig, ChallengeId, Challenge, ServerContext,
+    RenderingOptions,
+)
 from .challenge_templates import instantiate_templates
 
 
@@ -27,7 +30,8 @@ def _verify_text_is_close(correct_answer: str,
                           user_answer: str,
                           num_letters_per_allowed_typo: int) -> bool:
     distance = Levenshtein.distance(user_answer, correct_answer)
-    max_distance = math.ceil(len(correct_answer) / num_letters_per_allowed_typo)
+    max_distance = math.ceil(
+        len(correct_answer) / num_letters_per_allowed_typo)
     return distance <= max_distance
 
 
@@ -66,7 +70,9 @@ class CaptchaGenerator:
                                 attempt_number, correct_answer)
         return challenge_id, challenge, context
 
-    def verify_response(self, user_answer: str, context: ServerContext) -> bool:
+    def verify_response(self,
+                        user_answer: str,
+                        context: ServerContext) -> bool:
         if not _verify_timeout(context.timestamp, self.response_timeout_sec):
             return False
         if not _verify_text_is_close(context.correct_answer, user_answer,
