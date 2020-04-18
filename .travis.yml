@@ -22,3 +22,12 @@ script:
 
 after_success:
   - coveralls
+
+deploy:
+  provider: pypi
+  user: __token__
+  password:
+    secure: KWcRgLT5Sz8E3eRt+g+0zgzmLbb1REc0JBS/16mKAJHW+7nE8j61YzRxh305lJgGUnCRAH/06tz9LPX4wLezhpuAqOMlwVYxiAWMZxl7yiBLG+8Hvlebcy8wQ6zjNcioCpZamkQzQtPjpsBmLTD5Za7njDJ02okqk/c1xLcSyU1r9P9eEz30qtNiZg67lWj6/wYOkNaJ5VydoRhZ4OC5+cZI+QGKYtHpEPBe+iYI7Nzx3y9CDdmej4/LtSWG8zKL5eezD9nMmDW/644TK6yXg2FBaU8GQjMq0SoFBu4Phr1+aWLFUy8+uaiwPRkefXKiku2f4lS8hI0cVkxAPtAjBQkNsRs40i7Wy4QcnryBT4EJWHLlwxNAOrMous6NogU8DgSRYy2x9+2zpu3zmGQgmBLNS4yI6iRnEuSOkI/g9LV3QXjiFPjmJdg3/wsuM6qZNxQVhApbxgvKaundHle3RV+O7rFZ30mP7ScfB7O303H+JsNzgZqVwqoZ/bCy2RMgBDTq4yW6uJX4Zg2qnLu0pM7UHE0JnkbhF4p80fz6ztprVRLqkva7r/gZL86BwdguZFeHbdyAWh6oxJRcpkxI1BRgtGwypJ2MxuYKl/xkKs5SxGBOdoLcauamAureFUw42FdiXYGPu7x+OL5Do32AxlLj+xt9eJ+fpmFl0yObIuQ=
+  skip_existing: true
+  on:
+    tags: true
