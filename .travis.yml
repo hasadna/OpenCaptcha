@@ -5,9 +5,9 @@ python:
   - 3.7
   - 3.8
 
-#matrix:
-#  include:
-#    - env: TOXENV=lint
+matrix:
+  include:
+    - env: TOXENV=lint
 
 env:
   global:
