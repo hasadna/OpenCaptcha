@@ -1,0 +1,6 @@
+setuptools
+tox
+pylama
+pytest
+pytest-cov
+coverage

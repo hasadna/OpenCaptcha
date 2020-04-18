@@ -29,7 +29,7 @@ class ChallengeTemplate(ABC):
                            rendering_options: RenderingOptions = None
                            ) -> Tuple[Challenge, str]:
         """Generate and return a challenge and its correct answer."""
-        pass
+        pass  # pragma: no cover
 
 
 def get_class_by_name_mapping() -> Mapping[str, Type[ChallengeTemplate]]:
