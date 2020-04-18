@@ -25,9 +25,11 @@ class ConfigurationError(CaptchaError):
 InputTableRow = Mapping[str, Any]  # column name -> value
 InputTable = Sequence[InputTableRow]
 
-# Input type for template configurations, which can be easily saved/loaded from a JSON file.
-# Each template config is a pair of (template name, template parameters).
-# The template parameters are specific to the type of the template being configured.
+# Input type for template configurations, which can be easily saved/loaded from
+# a JSON file. Each template config is a pair of (template name, template
+# parameters).
+# The template parameters are specific to the type of the template being
+# configured.
 TemplateParams = Mapping[str, Any]
 TemplateConfig = Tuple[str, TemplateParams]
 
