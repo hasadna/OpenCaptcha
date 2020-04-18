@@ -6,8 +6,8 @@ from typing import Mapping, Sequence, Tuple
 import Levenshtein
 import pandas as pd
 
-from common_types import RNG, InputTable, TemplateConfig, ChallengeId, Challenge, ServerContext, RenderingOptions
-from challenge_templates import instantiate_templates
+from .common_types import RNG, InputTable, TemplateConfig, ChallengeId, Challenge, ServerContext, RenderingOptions
+from .challenge_templates import instantiate_templates
 
 
 def _get_timestamp() -> int:

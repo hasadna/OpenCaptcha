@@ -1,5 +1,5 @@
-from common_types import Challenge, DataTables, RNG, RenderingOptions
-from challenge_templates import ChallengeTemplate
+from open_captcha.common_types import Challenge
+from open_captcha.challenge_templates import ChallengeTemplate
 
 
 class QuestTemplate(ChallengeTemplate):

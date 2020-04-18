@@ -132,4 +132,4 @@ dmypy.json
 .pyre/
 
 # Test debugging artifacts
-testdata/*-latest-run.png
+tests/testdata/*-latest-run.png

@@ -2,13 +2,13 @@ import unittest
 import unittest.mock
 import os
 import pandas as pd
-from common_types import CaptchaError, RenderingOptions, RNG
-from challenge_templates import (
-    UnknownTemplate, BadTemplateParameters, ConfigurationError, ChallengeTemplate, MinMaxBarTemplate,
+from open_captcha.common_types import CaptchaError, RenderingOptions, RNG
+from open_captcha.challenge_templates import (
+    UnknownTemplate, BadTemplateParameters, ConfigurationError, MinMaxBarTemplate,
     get_class_by_name_mapping, instantiate_one_template, instantiate_templates,
     render_bar_chart,
 )
-from fake_template import QuestTemplate
+from tests.fake_template import QuestTemplate
 
 
 class TemplateRegistrationTest(unittest.TestCase):
@@ -120,7 +120,7 @@ class MinMaxBarTemplateTest(unittest.TestCase):
                 n=3
             )
 
-    @unittest.mock.patch('challenge_templates.render_bar_chart')
+    @unittest.mock.patch('open_captcha.challenge_templates.render_bar_chart')
     def test_max(self, mock_render):
         mock_options = unittest.mock.Mock()
         question = 'These {n} cities had the most reported symptoms yesterday. Which city reported the most symptoms?'
@@ -143,7 +143,7 @@ class MinMaxBarTemplateTest(unittest.TestCase):
         actual_pairs = {(name, value) for name, value in mock_render.call_args_list[0][0][0]}
         self.assertEqual(actual_pairs, expected_pairs)
 
-    @unittest.mock.patch('challenge_templates.render_bar_chart')
+    @unittest.mock.patch('open_captcha.challenge_templates.render_bar_chart')
     def test_min(self, mock_render):
         mock_options = unittest.mock.Mock()
         question = 'These {n} cities had the least reported symptoms yesterday. Which city reported the least symptoms?'

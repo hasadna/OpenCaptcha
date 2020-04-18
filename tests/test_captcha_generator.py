@@ -2,11 +2,11 @@ import unittest
 import unittest.mock
 import time
 import pandas as pd
-from common_types import Challenge, ServerContext
-from captcha_generator import (
+from open_captcha.common_types import Challenge, ServerContext
+from open_captcha.captcha_generator import (
     _get_timestamp, _generate_challenge_id, _verify_timeout, _verify_text_is_close, CaptchaGenerator
 )
-from fake_template import QuestTemplate
+from tests.fake_template import QuestTemplate
 
 
 class HelperFunctionsTest(unittest.TestCase):
@@ -25,7 +25,7 @@ class HelperFunctionsTest(unittest.TestCase):
             assert isinstance(cid, str)
             self.assertEqual(len(cid), 32)
 
-    @unittest.mock.patch('captcha_generator._get_timestamp')
+    @unittest.mock.patch('open_captcha.captcha_generator._get_timestamp')
     def test_verify_timeout(self, mock_get_timestamp):
         t0 = 100
         delta = 10
@@ -75,7 +75,7 @@ class CaptchaGeneratorTest(unittest.TestCase):
             verify_config=verify_config
         )
 
-    @unittest.mock.patch('captcha_generator.RNG')
+    @unittest.mock.patch('open_captcha.captcha_generator.RNG')
     def test_configuration_sanity(self, mock_RNG):
         captcha = self._get_captcha_generator(self.data, self.template_configs)
         self.assertEqual(captcha.data.keys(), {'report_counts'})
@@ -98,8 +98,8 @@ class CaptchaGeneratorTest(unittest.TestCase):
         with self.assertRaisesRegex(Exception, 'boom!'):
             self._get_captcha_generator(self.data, template_configs)
 
-    @unittest.mock.patch('captcha_generator._get_timestamp')
-    @unittest.mock.patch('captcha_generator._generate_challenge_id')
+    @unittest.mock.patch('open_captcha.captcha_generator._get_timestamp')
+    @unittest.mock.patch('open_captcha.captcha_generator._generate_challenge_id')
     def test_generate_challenge(self, mock_generate_challenge_id, mock_get_timestamp):
         # Arrange
         silly_challenge = Challenge('stuff', b'some bytes', ['A', 'B', 'C'])
@@ -126,8 +126,8 @@ class CaptchaGeneratorTest(unittest.TestCase):
         )
         self.assertEqual(context, expected_context)
 
-    @unittest.mock.patch('captcha_generator._verify_text_is_close')
-    @unittest.mock.patch('captcha_generator._verify_timeout')
+    @unittest.mock.patch('open_captcha.captcha_generator._verify_text_is_close')
+    @unittest.mock.patch('open_captcha.captcha_generator._verify_timeout')
     def test_verify_response(self, mock_verify_timeout, mock_verify_text):
         captcha = self._get_captcha_generator(self.data, self.template_configs)
         context = ServerContext(

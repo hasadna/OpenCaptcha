@@ -2,9 +2,9 @@ import unittest
 import json
 import os
 import textwrap
-from common_types import ServerContext, RenderingOptions
-from captcha_generator import CaptchaGenerator
-from challenge_templates import render_bar_chart
+from open_captcha.common_types import ServerContext, RenderingOptions
+from open_captcha.captcha_generator import CaptchaGenerator
+from open_captcha.challenge_templates import render_bar_chart
 
 
 class IntegrationTest(unittest.TestCase):

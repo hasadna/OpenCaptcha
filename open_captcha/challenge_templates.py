@@ -4,7 +4,7 @@ from typing import Sequence, Tuple, Mapping, Type
 
 import matplotlib.figure
 
-from common_types import (
+from .common_types import (
     TemplateConfig, ConfigurationError, Challenge, CaptchaError, DataTables, RNG, RenderingOptions
 )
 

@@ -1,6 +1,6 @@
 import unittest
 import json
-from common_types import ServerContext, RenderingOptions
+from open_captcha.common_types import ServerContext, RenderingOptions
 
 
 class RenderingOptionsTest(unittest.TestCase):
