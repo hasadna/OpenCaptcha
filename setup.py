@@ -44,7 +44,7 @@ setup(
     description='CAPTCHA challenges generated from your service\'s data',
     author='Hasadna',
     author_email='info@hasadna.org.il',
-    url='https://www.hasadna.org.il',
+    url='https://github.com/hasadna/OpenCaptcha',
     license='MIT',
     keywords=[
         'CAPTCHA',
