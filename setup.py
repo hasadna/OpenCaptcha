@@ -41,6 +41,7 @@ setup(
     tests_require=TESTS_REQUIRE,
     extras_require={'develop': TESTS_REQUIRE},
     long_description=README,
+    long_description_content_type="text/markdown",
     description='CAPTCHA challenges generated from your service\'s data',
     author='Hasadna',
     author_email='info@hasadna.org.il',
